@@ -9,31 +9,24 @@ class FormHandler {
             session_start();
         }
 
-        // Initialize session if not set
         if (!isset($_SESSION['form_data'])) {
             $_SESSION['form_data'] = array();
         }
 
-        // Retrieve data from session
         $this->formData = $_SESSION['form_data'];
     }
 
     public function handleFormSubmission($data) {
-        // Check if form has been submitted
         if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
             // Add new data to the array
             $this->formData[] = $data;
-
-            // Save data back to session
+            
             $_SESSION['form_data'] = $this->formData;
-
-            // Redirect to a clean page to avoid duplicate submissions
             $this->redirect('index.php');
         }
     }
 
     public function displayFormData() {
-        // Display the data saved in the session
         if (!empty($this->formData)) {
             echo "<table>";
             echo "<thead><tr><th>Nama</th><th>Email</th><th>WhatsApp</th><th>Alamat</th></tr></thead>";
@@ -52,15 +45,13 @@ class FormHandler {
             echo "<h2>Tidak Ada Data yang Disimpan</h2>";
         }
     }
-
-    // Function to perform a redirect
+    
     private function redirect($url) {
         header("Location: $url");
         exit();
     }
 }
 
-// Process the form if there is submitted data
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $nama = $_POST['nama'] ?? '';
     $email = $_POST['email'] ?? '';
@@ -73,11 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         'whatsapp' => $whatsapp,
         'alamat' => $alamat
     );
-
-    // Create FormHandler object
+    
     $formHandler = new FormHandler();
-
-    // Call the method to handle form data
     $formHandler->handleFormSubmission($data);
 }
 ?>
@@ -111,13 +99,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     </style>
 </head>
 <body>
-    <!-- Display the saved data -->
+    
     <?php
     $formHandler = new FormHandler();
     $formHandler->displayFormData();
     ?>
 
-    <!-- Form to input data -->
     <h1>Form PHP OOP</h1>
     <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
         <label for="nama">Nama:</label><br>
