@@ -1,132 +1,138 @@
 <?php
-include 'koneksi.php';
 
-// Proses ketika nyimpen ke database :)
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nama = $_POST['nama'];
-    $email = $_POST['email'];
-    $whatsapp = $_POST['whatsapp'];
-    $alamat = $_POST['alamat'];
+class FormHandler {
+    private $formData = array();
 
-    $sql = "INSERT INTO data1 (nama, email, whatsapp, alamat) VALUES ('$nama', '$email', '$whatsapp', '$alamat')";
-    
-    if (mysqli_query($koneksi, $sql)) {
-        echo "<script>alert('Data berhasil disimpan');</script>";
-        header("Location: ".$_SERVER['PHP_SELF']); // biar ga kemana-mana kalau pas di klik submit coy
-        exit; // ini juga agar pas eksekusi skrip diatas yaitu """if (mysqli_query($koneksi, $sql)) { echo "<script>alert('Data berhasil disimpan');</script>";""" tidak kemana-mana
-    } else {
-        echo "Error: " . $sql . "<br>" . mysqli_error($koneksi);
+    public function __construct() {
+        // Start session if not started
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Initialize session if not set
+        if (!isset($_SESSION['form_data'])) {
+            $_SESSION['form_data'] = array();
+        }
+
+        // Retrieve data from session
+        $this->formData = $_SESSION['form_data'];
+    }
+
+    public function handleFormSubmission($data) {
+        // Check if form has been submitted
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+            // Add new data to the array
+            $this->formData[] = $data;
+
+            // Save data back to session
+            $_SESSION['form_data'] = $this->formData;
+
+            // Redirect to a clean page to avoid duplicate submissions
+            $this->redirect('index.php');
+        }
+    }
+
+    public function displayFormData() {
+        // Display the data saved in the session
+        if (!empty($this->formData)) {
+            echo "<table>";
+            echo "<thead><tr><th>Nama</th><th>Email</th><th>WhatsApp</th><th>Alamat</th></tr></thead>";
+            echo "<tbody>";
+            foreach ($this->formData as $data) {
+                echo "<tr>";
+                echo "<td>" . htmlspecialchars($data['nama']) . "</td>";
+                echo "<td>" . htmlspecialchars($data['email']) . "</td>";
+                echo "<td>" . htmlspecialchars($data['whatsapp']) . "</td>";
+                echo "<td>" . htmlspecialchars($data['alamat']) . "</td>";
+                echo "</tr>";
+            }
+            echo "</tbody>";
+            echo "</table>";
+        } else {
+            echo "<h2>Tidak Ada Data yang Disimpan</h2>";
+        }
+    }
+
+    // Function to perform a redirect
+    private function redirect($url) {
+        header("Location: $url");
+        exit();
     }
 }
 
-// Tampilan data yang telah disimpan
-$result = mysqli_query($koneksi, "SELECT * FROM data1");
+// Process the form if there is submitted data
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
+    $nama = $_POST['nama'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $whatsapp = $_POST['whatsapp'] ?? '';
+    $alamat = $_POST['alamat'] ?? '';
+
+    $data = array(
+        'nama' => $nama,
+        'email' => $email,
+        'whatsapp' => $whatsapp,
+        'alamat' => $alamat
+    );
+
+    // Create FormHandler object
+    $formHandler = new FormHandler();
+
+    // Call the method to handle form data
+    $formHandler->handleFormSubmission($data);
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TUGAS OOP PHP DATABASE SEDERHANA</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 0;
-    }
-    .container {
-        display: flex;
-    }
-    .left-panel {
-        width: 50%;
-        padding: 20px;
-    }
-    .right-panel {
-        width: 50%;
-        padding: 20px;
-    }
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-bottom: 20px;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
-    th {
-        background-color: #f2f2f2;
-    }
-    form {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        width: 300px;
-    }
-    form input[type="text"],
-    form input[type="email"],
-    form input[type="tel"],
-    form textarea {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
-    form input[type="submit"] {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-    form input[type="submit"]:hover {
-        background-color: #0056b3;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form PHP OOP</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div class="left-panel">
-            <?php
-            if ($result && mysqli_num_rows($result) > 0) {
-                echo "<h2>Data yang Telah Disimpan</h2>";
-                echo "<table>";
-                echo "<tr><th>Nama</th><th>Email</th><th>WhatsApp</th><th>Alamat</th></tr>";
-                while($row = mysqli_fetch_assoc($result)) {
-                    echo "<tr><td>".$row["nama"]."</td><td>".$row["email"]."</td><td>".$row["whatsapp"]."</td><td>".$row["alamat"]."</td></tr>";
-                }
-                echo "</table>";
-            } else {
-                echo "<h2>Data yang Telah Disimpan</h2>";
-                echo "<p>Tidak ada data yang tersimpan.</p>";
-            }
-            ?>
-        </div>
-        <div class="right-panel">
-            <form action="#" method="post">
-                <h2>DATA</h2>
-                <label for="nama">Nama:</label>
-                <input type="text" id="nama" name="nama" required>
+    <!-- Display the saved data -->
+    <?php
+    $formHandler = new FormHandler();
+    $formHandler->displayFormData();
+    ?>
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
-
-                <label for="whatsapp">WhatsApp:</label>
-                <input type="tel" id="whatsapp" name="whatsapp" pattern="[0-9]{10,14}" required>
-
-                <label for="alamat">Alamat:</label>
-                <textarea id="alamat" name="alamat" required></textarea>
-
-                <input type="submit" value="Kirim">
-            </form>
-        </div>
-    </div>
+    <!-- Form to input data -->
+    <h1>Form PHP OOP</h1>
+    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+        <label for="nama">Nama:</label><br>
+        <input type="text" id="nama" name="nama" required><br>
+        
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+        
+        <label for="whatsapp">Whatsapp:</label><br>
+        <input type="text" id="whatsapp" name="whatsapp" required><br>
+        
+        <label for="alamat">Alamat:</label><br>
+        <textarea id="alamat" name="alamat" required></textarea><br>
+        
+        <input type="submit" name="submit" value="Simpan">
+    </form>
 </body>
 </html>
