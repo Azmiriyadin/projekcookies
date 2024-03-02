@@ -22,7 +22,7 @@ Anda bisa melihat contoh implementasi di [index.php](index.php).
 
 ## Bukti Projek hasil screensoot
 
-[![Bukti Projek](https://drive.google.com/file/d/10-c5GbKDpuVSnz58AIBq3i_2-GlXyjFF/view?usp=sharing)](https://drive.google.com/file/d/10-c5GbKDpuVSnz58AIBq3i_2-GlXyjFF/view)https://drive.google.com/file/d/10-c5GbKDpuVSnz58AIBq3i_2-GlXyjFF/view
+https://drive.google.com/file/d/10-c5GbKDpuVSnz58AIBq3i_2-GlXyjFF/view
 
 ## Dibuat oleh
 
